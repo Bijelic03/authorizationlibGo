@@ -8,7 +8,11 @@ import (
 
 type TokenClaims struct {
 	Username string `json:"username"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Email    string `json:"email"`
 	Role     string `json:"role"`
+	Exp      int64  `json:"exp"`
 }
 
 type Auth struct {
@@ -20,7 +24,6 @@ func NewAuth(secretKey string) *Auth {
 }
 
 func (a *Auth) VerifyToken(tokenString string) (*TokenClaims, error) {
-	// Parse the token with claims
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return a.SecretKey, nil
 	})
@@ -43,8 +46,20 @@ func (a *Auth) VerifyToken(tokenString string) (*TokenClaims, error) {
 	if username, ok := (*claims)["username"].(string); ok {
 		tokenClaims.Username = username
 	}
+	if name, ok := (*claims)["name"].(string); ok {
+		tokenClaims.Name = name
+	}
+	if surname, ok := (*claims)["surname"].(string); ok {
+		tokenClaims.Surname = surname
+	}
+	if email, ok := (*claims)["email"].(string); ok {
+		tokenClaims.Email = email
+	}
 	if role, ok := (*claims)["role"].(string); ok {
 		tokenClaims.Role = role
+	}
+	if exp, ok := (*claims)["exp"].(float64); ok {
+		tokenClaims.Exp = int64(exp)
 	}
 
 	return tokenClaims, nil
