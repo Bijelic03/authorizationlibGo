@@ -1,0 +1,10 @@
+cat <<EOF > .gitignore
+# Go files
+*.exe
+*.log
+*.out
+*.test
+
+# Dependency directories
+/vendor/
+EOF
