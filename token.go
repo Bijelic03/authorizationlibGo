@@ -25,7 +25,7 @@ func NewAuth(secretKey string) *Auth {
 
 func (a *Auth) VerifyToken(tokenString string) (*TokenClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return a.SecretKey, nil
+		return []byte(a.SecretKey), nil
 	})
 
 	if err != nil {
