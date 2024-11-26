@@ -9,7 +9,7 @@ type AuthHandler struct {
 	auth *Auth
 }
 
-func NewAuthHandler(secretKey string) *AuthHandler {
+func NewAuthHandler(secretKey []byte) *AuthHandler {
 	return &AuthHandler{auth: NewAuth(secretKey)}
 }
 

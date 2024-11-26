@@ -16,16 +16,16 @@ type TokenClaims struct {
 }
 
 type Auth struct {
-	SecretKey string
+	SecretKey []byte
 }
 
-func NewAuth(secretKey string) *Auth {
+func NewAuth(secretKey []byte) *Auth {
 	return &Auth{SecretKey: secretKey}
 }
 
 func (a *Auth) VerifyToken(tokenString string) (*TokenClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(a.SecretKey), nil
+		return a.SecretKey, nil
 	})
 
 	if err != nil {
