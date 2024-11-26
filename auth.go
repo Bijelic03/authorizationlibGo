@@ -30,7 +30,7 @@ func (h *AuthHandler) verifyTokenAndSetHeaders(w http.ResponseWriter, r *http.Re
 
 	tokenClaims, err := h.auth.VerifyToken(tokenString)
 	if err != nil {
-		http.Error(w, `{"error": "Invalid token"}`, http.StatusUnauthorized)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return false
 	}
 
