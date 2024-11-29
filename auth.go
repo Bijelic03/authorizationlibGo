@@ -1,6 +1,7 @@
 package authorizationlib
 
 import (
+	"context"
 	"net/http"
 	"strings"
 )
@@ -21,17 +22,24 @@ func parseBearerToken(header string) string {
 	return ""
 }
 
-func (h *AuthHandler) verifyTokenAndSetHeaders(w http.ResponseWriter, r *http.Request, allowedRoles []string) bool {
+type contextKey string
+
+const (
+	UsernameKey contextKey = "username"
+	RoleKey     contextKey = "role"
+)
+
+func (h *AuthHandler) verifyTokenAndSetContext(ctx context.Context, w http.ResponseWriter, r *http.Request, allowedRoles []string) (context.Context, bool) {
 	tokenString := parseBearerToken(r.Header.Get("Authorization"))
 	if tokenString == "" {
 		http.Error(w, `{"error": "Invalid or missing authorization header"}`, http.StatusUnauthorized)
-		return false
+		return ctx, false
 	}
 
 	tokenClaims, err := h.auth.VerifyToken(tokenString)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return false
+		return ctx, false
 	}
 
 	if len(allowedRoles) > 0 {
@@ -45,11 +53,12 @@ func (h *AuthHandler) verifyTokenAndSetHeaders(w http.ResponseWriter, r *http.Re
 
 		if !roleAllowed {
 			http.Error(w, `{"error": "Access denied for the required role"}`, http.StatusForbidden)
-			return false
+			return ctx, false
 		}
 	}
 
-	w.Header().Set("username", tokenClaims.Username)
-	w.Header().Set("role", tokenClaims.Role)
-	return true
+	// Dodavanje username i role u context
+	ctx = context.WithValue(ctx, UsernameKey, tokenClaims.Username)
+	ctx = context.WithValue(ctx, RoleKey, tokenClaims.Role)
+	return ctx, true
 }
