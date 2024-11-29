@@ -6,18 +6,20 @@ import (
 
 func (h *AuthHandler) MiddlewareAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !h.verifyTokenAndSetHeaders(w, r, []string{"PROJECT_MEMBER", "PROJECT_MANAGER"}) {
+		ctx, ok := h.verifyTokenAndSetContext(r.Context(), w, r, []string{"PROJECT_MEMBER", "PROJECT_MANAGER"})
+		if !ok {
 			return
 		}
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
 func (h *AuthHandler) MiddlewareAuthManager(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !h.verifyTokenAndSetHeaders(w, r, []string{"PROJECT_MANAGER"}) {
+		ctx, ok := h.verifyTokenAndSetContext(r.Context(), w, r, []string{"PROJECT_MANAGER"})
+		if !ok {
 			return
 		}
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
