@@ -24,10 +24,10 @@ func parseBearerToken(header string) string {
 
 type contextKey string
 
-const (
-	UsernameKey contextKey = "username"
-	RoleKey     contextKey = "role"
-)
+type UserContext struct {
+	Username string
+	Role     string
+}
 
 func (h *AuthHandler) verifyTokenAndSetContext(ctx context.Context, w http.ResponseWriter, r *http.Request, allowedRoles []string) (context.Context, bool) {
 	tokenString := parseBearerToken(r.Header.Get("Authorization"))
@@ -57,8 +57,15 @@ func (h *AuthHandler) verifyTokenAndSetContext(ctx context.Context, w http.Respo
 		}
 	}
 
-	// Dodavanje username i role u context
-	ctx = context.WithValue(ctx, UsernameKey, tokenClaims.Username)
-	ctx = context.WithValue(ctx, RoleKey, tokenClaims.Role)
-	return ctx, true
+	// Dodajte korisničke podatke u novi context sa custom tipom
+	userCtx := &UserContext{
+		Username: tokenClaims.Username,
+		Role:     tokenClaims.Role,
+	}
+	return context.WithValue(ctx, "user", userCtx), true
+}
+
+func GetUserFromContext(ctx context.Context) (*UserContext, bool) {
+	userCtx, ok := ctx.Value("user").(*UserContext)
+	return userCtx, ok
 }
